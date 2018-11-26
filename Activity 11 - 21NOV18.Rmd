@@ -1,0 +1,84 @@
+---
+title: "Activity 11"
+author: "Charlene Thomas"
+date: "11/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Activity - Lab 11
+
+1.Write a function that generates numbers from binomial(n, p) distribution using runif()function. Hint:binomial(n, p) random variable can be defined as a sum of  n independent Bernoulli (p) random variables.
+
+```{r}
+set.seed(3)
+heads <- function(x, prob) {
+  trial <- runif(x, 0, 1)
+  sum(trial <= prob)
+}
+
+heads(100, 0.5)
+rbinom(1,100,0.5)
+
+```
+
+2. Compare performance of your function with rbinom() using microbenchmark() function.
+
+```{r}
+library(microbenchmark)
+
+microbenchmark(heads(100, 0.5),
+               rbinom(1,100,0.5))
+
+```
+
+3. Suppose we want to simulate data from a linear regression model:Yi= β0 + β1 × Xi +i i= 1,...,N where∼N(0,3) and X is a covariate that ranges between 20 and 40. Let β0= 15 and β1= 0.4 are known coefficients. Generate data (N = 50) from this models with given coefficients. Fit a linear regression model and plot fitted values vs residuals using ggplot() function. Please do not forget to use set.seed() function for reproducibility.
+
+```{r}
+library(ggplot2)
+set.seed(1231)
+
+e <- rnorm(50, 0, 3)
+x <- sample(20:40, 50, replace = TRUE)
+b0 <- 15
+b1 <- 0.4
+y <- b0 + b1*x + e
+
+linear.model <-lm(x ~ y)
+
+ggplot() + 
+  geom_point(aes(x = linear.model$fitted.values,  y = linear.model$residuals))
+```
+
+
+4. Box-Muller algorithm: generate U1 and U2 two independent uniform(0, 1) random variables and set: R=√−2 log(U1) and θ= 2πU2thenX=Rcos(θ) and Y=Rsin(θ) are two independent normal variables.
+
+Write a function that generates normal variates using Box-Muller algorithm. Compare simulated data from your function with simulated data fromrnorm()functionusingggplot()(histogram?).
+
+```{r}
+box.muller <- function(n) {
+  U1 <- runif((n / 2), 0, 1)
+  U2 <- runif((n / 2), 0, 1)
+R <- sqrt(-2 * log(U1))
+theta <- 2 * pi * U2
+X <- R * cos(theta)
+Y <- R * sin(theta)
+list <- c(X, Y)
+return(list)
+}
+
+muller <- box.muller(1000)
+
+normal <- rnorm(1000, 0, 1)
+
+ggplot() +
+  geom_density(aes(normal, fill = "green", alpha = 0.5)) + 
+  geom_density(aes(muller, fill = "blue", alpha = 0.5)) +
+  guides(alpha = FALSE)
+
+```
+
+
